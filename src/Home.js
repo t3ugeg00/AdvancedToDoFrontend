@@ -1,14 +1,16 @@
-import './App.css';
+import './Home.css';
 
 import Row from './Row';
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useUser } from './context/useUser';
 
-const URL = 'http://localhost:3001/';
+const URL = process.env.REACT_APP_API_URL;
 
-function App() {
+function Home() {
 
+  const { user } = useUser();
   const [task, setTask] = useState('');
   const [tasks, setTasks] = useState([]);
 
@@ -29,9 +31,11 @@ function App() {
     if (event.key == 'Enter') {
       event.preventDefault();
 
+      const headers = {headers: {Authorization: user.token}};
+
       axios.post(URL + 'create',{
         description: task
-      })
+      }, headers)
       .then(response => {
         setTasks([...tasks, {id: response.data.id, description: response.data.description}]);
         setTask('');
@@ -42,7 +46,9 @@ function App() {
   }
 
   function remover(id) {
-    axios.delete(`${URL}delete/${id}`)
+    const headers = {headers: {Authorization: user.token}};
+
+    axios.delete(`${URL}delete/${id}`, headers)
     .then(response => {
       setTasks(
         tasks.filter(element => element.id != id)
@@ -67,4 +73,4 @@ function App() {
   );
 }
 
-export default App;
+export default Home;
